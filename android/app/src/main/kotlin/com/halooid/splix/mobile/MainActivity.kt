@@ -1,4 +1,4 @@
-package com.halooid.splix.splix_mobile
+package com.halooid.splix.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
