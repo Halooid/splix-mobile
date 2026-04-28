@@ -7,6 +7,7 @@ import '../../features/profile/pages/profile_page.dart';
 import '../../features/friends/pages/friends_page.dart';
 import '../../features/groups/pages/groups_page.dart';
 import '../../features/expense/pages/add_expense_page.dart';
+import '../../features/expense/pages/who_paid_page.dart';
 import '../../features/dashboard/widgets/scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -66,6 +67,14 @@ final router = GoRouter(
       path: '/add-expense',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const AddExpensePage(),
+    ),
+    GoRoute(
+      path: '/who-paid',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final currencyCode = state.extra as String? ?? 'USD';
+        return WhoPaidPage(currencyCode: currencyCode);
+      },
     ),
   ],
 );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:splix_mobile/core/widgets/glass_bottom_sheet.dart';
 
 class AddExpensePage extends StatefulWidget {
@@ -130,6 +131,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           ..._selectedConnections.map((c) {
                             final isLast = c == _selectedConnections.last;
                             return Chip(
+                              shape: const StadiumBorder(),
                               label: Text(
                                 c,
                                 style: const TextStyle(fontSize: 12),
@@ -150,13 +152,13 @@ class _AddExpensePageState extends State<AddExpensePage> {
                             );
                           }),
                           SizedBox(
-                            width: 150,
+                            width: 100,
                             child: TextField(
                               controller: controller,
                               focusNode: focusNode,
                               onEditingComplete: onEditingComplete,
                               decoration: const InputDecoration(
-                                hintText: 'type name',
+                                hintText: 'Type name',
                                 border: InputBorder.none,
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
@@ -246,7 +248,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                 children: [
                   const Text('Paid by '),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () => context.push('/who-paid', extra: _selectedCurrency),
                     style: TextButton.styleFrom(
                       backgroundColor: Colors.green.withValues(alpha: 0.1),
                       padding: const EdgeInsets.symmetric(horizontal: 12),
