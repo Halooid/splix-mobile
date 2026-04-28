@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:get_it/get_it.dart';
 import 'package:auth/auth.dart';
 
@@ -8,7 +9,7 @@ Future<void> configureDependencies() async {
   final authConfig = AuthConfig(
     clientId: 'splix-mobile',
     redirectUri: 'com.halooid.splix.mobile://oauth/callback',
-    discoveryUrl: 'https://auth.halooid.com/realms/halooid/.well-known/openid-configuration',
+    discoveryUrl: 'https://auth.droprit.com/realms/halooid/.well-known/openid-configuration',
   );
 
   // Services
