@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/theme/app_theme.dart';
+import '../widgets/donut_chart_section.dart';
+import '../widgets/activity_list_item.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -8,62 +11,84 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: Text(
+          'Dashboard',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        centerTitle: false,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => context.push('/profile'),
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {},
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Expenses Overview',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            const SizedBox(height: 12),
+            const DonutChartSection(
+              youOwe: 450.00,
+              youAreOwed: 1250.00,
             ),
-            SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                title: Text('You are owed'),
-                trailing: Text('\$0.00', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                title: Text('You owe'),
-                trailing: Text('\$0.00', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.push('/friends'),
-                    icon: const Icon(Icons.person),
-                    label: const Text('Friends'),
-                  ),
+                Text(
+                  'Recent Activity',
+                  style: Theme.of(context).textTheme.titleLarge,
                 ),
-                SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => context.push('/groups'),
-                    icon: const Icon(Icons.group),
-                    label: const Text('Groups'),
-                  ),
+                TextButton(
+                  onPressed: () {},
+                  child: const Text('View All'),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            const ActivityListItem(
+              title: 'Dinner at Nobu',
+              subtitle: 'Split with Alex, Sarah',
+              amount: '\$120.00',
+              isOwed: true,
+              icon: Icons.restaurant,
+            ),
+            const ActivityListItem(
+              title: 'Weekly Groceries',
+              subtitle: 'Shared with Roommate',
+              amount: '\$45.50',
+              isOwed: false,
+              icon: Icons.shopping_cart_outlined,
+            ),
+            const ActivityListItem(
+              title: 'Gas Refill',
+              subtitle: 'Trip to Tahoe',
+              amount: '\$32.00',
+              isOwed: true,
+              icon: Icons.local_gas_station_outlined,
+            ),
+            const ActivityListItem(
+              title: 'Netflix Subscription',
+              subtitle: 'Family Plan',
+              amount: '\$15.99',
+              isOwed: false,
+              icon: Icons.tv,
+            ),
+            const SizedBox(height: 100), // Space for FAB
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/add-expense'),
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.add),
+        label: const Text('Add Expense'),
+        backgroundColor: AppTheme.primaryColor,
+        foregroundColor: Colors.white,
       ),
     );
   }

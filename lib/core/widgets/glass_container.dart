@@ -34,15 +34,15 @@ class GlassContainer extends StatelessWidget {
           child: Container(
             padding: padding,
             decoration: BoxDecoration(
-              color: color.withOpacity(opacity),
+              color: color.withValues(alpha: opacity),
               borderRadius: defaultBorderRadius,
               border: Border.all(
-                color: color.withOpacity(opacity * 1.5),
+                color: color.withValues(alpha: opacity * 1.5),
                 width: 1.5,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: 0.05),
                   blurRadius: 10,
                   spreadRadius: -2,
                 ),
