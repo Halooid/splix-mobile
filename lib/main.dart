@@ -4,6 +4,7 @@ import 'package:core/core.dart';
 import 'package:auth/auth.dart';
 import 'core/di/injection.dart';
 import 'core/router.dart';
+import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,10 +27,7 @@ class MyApp extends StatelessWidget {
       create: (context) => getIt<AuthBloc>()..add(AuthCheckRequested()),
       child: MaterialApp.router(
         title: 'Splix',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
         routerConfig: router,
       ),
     );
