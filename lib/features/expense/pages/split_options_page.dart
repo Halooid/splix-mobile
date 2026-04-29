@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SplitOptionsPage extends StatelessWidget {
   final String personName;
+  final List<String> participants;
+  final String currencyCode;
+  final double totalAmount;
 
   const SplitOptionsPage({
     super.key,
     required this.personName,
+    required this.participants,
+    required this.currencyCode,
+    required this.totalAmount,
   });
 
   @override
@@ -50,7 +57,14 @@ class SplitOptionsPage extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: TextButton.icon(
               onPressed: () {
-                // TODO: context.push('/adjust-split');
+                context.push(
+                  '/adjust-split',
+                  extra: {
+                    'participants': participants,
+                    'currencyCode': currencyCode,
+                    'totalAmount': totalAmount,
+                  },
+                );
               },
               icon: const Icon(Icons.tune),
               label: const Text('More options'),

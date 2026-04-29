@@ -9,6 +9,7 @@ import '../../features/groups/pages/groups_page.dart';
 import '../../features/expense/pages/add_expense_page.dart';
 import '../../features/expense/pages/who_paid_page.dart';
 import '../../features/expense/pages/split_options_page.dart';
+import '../../features/expense/pages/adjust_split_page.dart';
 import '../../features/dashboard/widgets/scaffold_with_navbar.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -81,8 +82,25 @@ final router = GoRouter(
       path: '/split-options',
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) {
-        final personName = state.extra as String? ?? 'Someone';
-        return SplitOptionsPage(personName: personName);
+        final params = state.extra as Map<String, dynamic>;
+        return SplitOptionsPage(
+          personName: params['personName'] as String,
+          participants: params['participants'] as List<String>,
+          currencyCode: params['currencyCode'] as String,
+          totalAmount: params['totalAmount'] as double,
+        );
+      },
+    ),
+    GoRoute(
+      path: '/adjust-split',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final params = state.extra as Map<String, dynamic>;
+        return AdjustSplitPage(
+          participants: params['participants'] as List<String>,
+          currencyCode: params['currencyCode'] as String,
+          totalAmount: params['totalAmount'] as double,
+        );
       },
     ),
   ],

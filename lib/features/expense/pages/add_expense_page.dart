@@ -253,7 +253,14 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         onPressed: () async {
                           final result = await context.push<String>(
                             '/split-options',
-                            extra: _selectedConnections.first,
+                            extra: {
+                              'personName': _selectedConnections.first,
+                              'participants': ['You', ..._selectedConnections],
+                              'currencyCode': _selectedCurrency,
+                              'totalAmount':
+                                  double.tryParse(_amountController.text) ??
+                                  0.0,
+                            },
                           );
                           if (result != null) {
                             setState(() {
@@ -302,7 +309,21 @@ class _AddExpensePageState extends State<AddExpensePage> {
                         ),
                         const Text(' and split '),
                         TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.push(
+                              '/adjust-split',
+                              extra: {
+                                'participants': [
+                                  'You',
+                                  ..._selectedConnections,
+                                ],
+                                'currencyCode': _selectedCurrency,
+                                'totalAmount':
+                                    double.tryParse(_amountController.text) ??
+                                    0.0,
+                              },
+                            );
+                          },
                           style: TextButton.styleFrom(
                             backgroundColor: Colors.green.withValues(alpha: 0.1),
                             padding: const EdgeInsets.symmetric(horizontal: 12),

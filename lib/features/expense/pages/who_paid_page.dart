@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:splix_mobile/core/widgets/amount_input_field.dart';
 
 class WhoPaidPage extends StatefulWidget {
   final String currencyCode;
@@ -111,35 +112,9 @@ class _WhoPaidPageState extends State<WhoPaidPage>
             ),
           ),
           title: Text(person),
-          trailing: SizedBox(
-            width: 80,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '${widget.currencyCode} ',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Expanded(
-                  child: TextField(
-                    controller: _amountControllers[person],
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    textAlign: TextAlign.end,
-                    decoration: const InputDecoration(
-                      hintText: '0.00',
-                      isDense: true,
-                      border: UnderlineInputBorder(),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+          trailing: AmountInputField(
+            controller: _amountControllers[person]!,
+            prefix: '${widget.currencyCode} ',
           ),
         );
       },
