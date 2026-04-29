@@ -27,6 +27,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
 
   // Currency field state
   String _selectedCurrency = 'USD';
+  String _selectedSplitText = 'Paid by you and split equally';
   final List<String> _currencies = [
     'USD',
     'EUR',
@@ -74,6 +75,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                   setState(() {
                     _selectedConnections.add(selection);
                     _backspaceCount = 0;
+                    _selectedSplitText = 'Paid by you and split equally';
                   });
                   _autocompleteController?.clear();
                 },
@@ -94,6 +96,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                           if (_backspaceCount >= 2) {
                             _selectedConnections.removeLast();
                             _backspaceCount = 0;
+                            _selectedSplitText = 'Paid by you and split equally';
                           }
                         });
                         return KeyEventResult.handled;
@@ -147,6 +150,7 @@ class _AddExpensePageState extends State<AddExpensePage> {
                                 setState(() {
                                   _selectedConnections.remove(c);
                                   _backspaceCount = 0;
+                                  _selectedSplitText = 'Paid by you and split equally';
                                 });
                               },
                             );
@@ -243,37 +247,74 @@ class _AddExpensePageState extends State<AddExpensePage> {
               const SizedBox(height: 32),
 
               // 4. Paid by and Split
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text('Paid by '),
-                  TextButton(
-                    onPressed: () => context.push('/who-paid', extra: _selectedCurrency),
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.green.withValues(alpha: 0.1),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      minimumSize: const Size(0, 32),
+              _selectedConnections.length == 1
+                  ? Center(
+                      child: TextButton(
+                        onPressed: () async {
+                          final result = await context.push<String>(
+                            '/split-options',
+                            extra: _selectedConnections.first,
+                          );
+                          if (result != null) {
+                            setState(() {
+                              _selectedSplitText = result;
+                            });
+                          }
+                        },
+                        style: TextButton.styleFrom(
+                          backgroundColor: Colors.green.withValues(alpha: 0.1),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        child: Text(
+                          _selectedSplitText,
+                          style: const TextStyle(
+                            color: Colors.green,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Paid by '),
+                        TextButton(
+                          onPressed:
+                              () => context.push(
+                                '/who-paid',
+                                extra: _selectedCurrency,
+                              ),
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.green.withValues(alpha: 0.1),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            minimumSize: const Size(0, 32),
+                          ),
+                          child: const Text(
+                            'you',
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ),
+                        const Text(' and split '),
+                        TextButton(
+                          onPressed: () {},
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.green.withValues(alpha: 0.1),
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            minimumSize: const Size(0, 32),
+                          ),
+                          child: const Text(
+                            'equally',
+                            style: TextStyle(color: Colors.green),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Text(
-                      'you',
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                  const Text(' and split '),
-                  TextButton(
-                    onPressed: () {},
-                    style: TextButton.styleFrom(
-                      backgroundColor: Colors.green.withValues(alpha: 0.1),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      minimumSize: const Size(0, 32),
-                    ),
-                    child: const Text(
-                      'equally',
-                      style: TextStyle(color: Colors.green),
-                    ),
-                  ),
-                ],
-              ),
               const Spacer(),
 
               // 5. Bottom Row
