@@ -6,17 +6,45 @@ import 'package:auth/auth.dart';
 import 'package:lottie/lottie.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/powered_by_halooid.dart';
+import '../../../core/di/injection.dart';
+import '../../../core/utils/jwt_utils.dart';
+import '../../profile/domain/usecases/create_user_usecase.dart';
 
-class AuthPage extends StatelessWidget {
+class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  bool _isRegistering = false;
 
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthBloc, AuthState>(
-      listener: (context, state) {
+      listener: (context, state) async {
         if (state is AuthAuthenticated) {
-          context.go('/dashboard');
+          if (_isRegistering && state.idToken != null) {
+            try {
+              final payload = JwtUtils.decode(state.idToken!);
+              final createUserUseCase = getIt<CreateUserUseCase>();
+              
+              await createUserUseCase(CreateUserParams(
+                id: payload['sub'] as String? ?? '',
+                email: payload['email'] as String? ?? '',
+                name: payload['name'] as String? ?? payload['preferred_username'] as String? ?? '',
+              ));
+            } catch (e) {
+              // Silently fail or log, user is already authenticated in Keycloak
+              debugPrint('Failed to create splix user: $e');
+            }
+          }
+          if (context.mounted) {
+            context.go('/dashboard');
+          }
         } else if (state is AuthFailureState) {
+          setState(() => _isRegistering = false);
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
@@ -54,22 +82,28 @@ class AuthPage extends StatelessWidget {
                                   Text(
                                     'Track it. Split it.\nForget it.',
                                     textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.headlineMedium
-                                        ?.copyWith(color: AppTheme.primaryColor),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineMedium
+                                        ?.copyWith(
+                                            color: AppTheme.primaryColor),
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
                                     'All your expenses, organized and under control',
                                     textAlign: TextAlign.center,
-                                    style: Theme.of(context).textTheme.bodyMedium
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
                                         ?.copyWith(color: Colors.black87),
                                   ),
                                   const SizedBox(height: 48),
                                   ElevatedButton(
                                     onPressed: () {
+                                      setState(() => _isRegistering = false);
                                       context.read<AuthBloc>().add(
-                                        AuthLoginRequested(),
-                                      );
+                                            AuthLoginRequested(),
+                                          );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size.fromHeight(50),
@@ -79,9 +113,10 @@ class AuthPage extends StatelessWidget {
                                   const SizedBox(height: 16),
                                   OutlinedButton(
                                     onPressed: () {
+                                      setState(() => _isRegistering = true);
                                       context.read<AuthBloc>().add(
-                                        AuthRegisterRequested(),
-                                      );
+                                            AuthRegisterRequested(),
+                                          );
                                     },
                                     style: OutlinedButton.styleFrom(
                                       minimumSize: const Size.fromHeight(50),
