@@ -14,10 +14,10 @@ final getIt = GetIt.instance;
 Future<void> configureDependencies() async {
   // Network (gRPC)
   final channel = ClientChannel(
-    EnvConfig.grpcHost,
-    port: EnvConfig.grpcPort,
+    EnvConfig.splixHost,
+    port: EnvConfig.servicePort,
     options: ChannelOptions(
-      credentials: EnvConfig.grpcSecure
+      credentials: EnvConfig.serviceSecure
           ? const ChannelCredentials.secure()
           : const ChannelCredentials.insecure(),
     ),
