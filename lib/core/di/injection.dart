@@ -6,6 +6,7 @@ import '../../features/profile/data/datasources/profile_remote_data_source.dart'
 import '../../features/profile/data/repositories/profile_repository_impl.dart';
 import '../../features/profile/domain/repositories/profile_repository.dart';
 import '../../features/profile/domain/usecases/create_user_usecase.dart';
+import '../../features/profile/domain/usecases/get_user_usecase.dart';
 import '../config/env_config.dart';
 
 
@@ -53,6 +54,9 @@ Future<void> configureDependencies() async {
   // Use Cases
   getIt.registerLazySingleton<CreateUserUseCase>(
     () => CreateUserUseCase(getIt<ProfileRepository>()),
+  );
+  getIt.registerLazySingleton<GetUserUseCase>(
+    () => GetUserUseCase(getIt<ProfileRepository>()),
   );
 
   // Blocs

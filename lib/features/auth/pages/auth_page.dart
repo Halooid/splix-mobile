@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'package:core/core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -9,6 +10,7 @@ import '../../../core/widgets/powered_by_halooid.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/utils/jwt_utils.dart';
 import '../../profile/domain/usecases/create_user_usecase.dart';
+import '../../profile/domain/usecases/get_user_usecase.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -25,23 +27,111 @@ class _AuthPageState extends State<AuthPage> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthAuthenticated) {
+          final payload = JwtUtils.decode(state.idToken!);
+          final userId = payload['sub'] as String? ?? '';
+
           if (_isRegistering && state.idToken != null) {
             try {
-              final payload = JwtUtils.decode(state.idToken!);
               final createUserUseCase = getIt<CreateUserUseCase>();
-              
-              await createUserUseCase(CreateUserParams(
-                id: payload['sub'] as String? ?? '',
-                email: payload['email'] as String? ?? '',
-                name: payload['name'] as String? ?? payload['preferred_username'] as String? ?? '',
-              ));
+              final result = await createUserUseCase(
+                CreateUserParams(
+                  id: userId,
+                  email: payload['email'] as String? ?? '',
+                  name:
+                      payload['name'] as String? ??
+                      payload['preferred_username'] as String? ??
+                      '',
+                ),
+              );
+
+              result.fold(
+                (failure) {
+                  debugPrint('Failed to create splix user: ${failure.message}');
+                  if (context.mounted) {
+                    setState(() => _isRegistering = false);
+                    context.read<AuthBloc>().add(AuthLogoutRequested());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Failed to initialize Splix account: ${failure.message}',
+                        ),
+                      ),
+                    );
+                  }
+                },
+                (_) {
+                  if (context.mounted) {
+                    context.go('/dashboard');
+                  }
+                },
+              );
             } catch (e) {
-              // Silently fail or log, user is already authenticated in Keycloak
-              debugPrint('Failed to create splix user: $e');
+              debugPrint('Unexpected error creating splix user: $e');
+              if (context.mounted) {
+                setState(() => _isRegistering = false);
+                context.read<AuthBloc>().add(AuthLogoutRequested());
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'An unexpected error occurred. Please try again.',
+                    ),
+                  ),
+                );
+              }
             }
-          }
-          if (context.mounted) {
-            context.go('/dashboard');
+          } else {
+            // Check if user exists in Splix DB
+            try {
+              final getUserUseCase = getIt<GetUserUseCase>();
+              final result = await getUserUseCase(GetUserParams(id: userId));
+
+              result.fold(
+                (failure) {
+                  if (failure is NotFoundFailure) {
+                    // User not found, redirect to registration
+                    if (context.mounted) {
+                      setState(() => _isRegistering = true);
+                      context.read<AuthBloc>().add(AuthRegisterRequested());
+                    }
+                  } else {
+                    // Server error or other failure, fail authentication
+                    debugPrint(
+                      'Server error checking user: ${failure.message}',
+                    );
+                    if (context.mounted) {
+                      setState(() => _isRegistering = false);
+                      context.read<AuthBloc>().add(AuthLogoutRequested());
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            'Error checking account status: ${failure.message}',
+                          ),
+                        ),
+                      );
+                    }
+                  }
+                },
+                (user) {
+                  // User exists, proceed to dashboard
+                  if (context.mounted) {
+                    context.go('/dashboard');
+                  }
+                },
+              );
+            } catch (e) {
+              debugPrint('Unexpected error checking user: $e');
+              if (context.mounted) {
+                setState(() => _isRegistering = false);
+                context.read<AuthBloc>().add(AuthLogoutRequested());
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'An unexpected error occurred. Please try again.',
+                    ),
+                  ),
+                );
+              }
+            }
           }
         } else if (state is AuthFailureState) {
           setState(() => _isRegistering = false);
@@ -82,11 +172,11 @@ class _AuthPageState extends State<AuthPage> {
                                   Text(
                                     'Track it. Split it.\nForget it.',
                                     textAlign: TextAlign.center,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineMedium
-                                        ?.copyWith(
-                                            color: AppTheme.primaryColor),
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.headlineMedium?.copyWith(
+                                      color: AppTheme.primaryColor,
+                                    ),
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
@@ -102,8 +192,8 @@ class _AuthPageState extends State<AuthPage> {
                                     onPressed: () {
                                       setState(() => _isRegistering = false);
                                       context.read<AuthBloc>().add(
-                                            AuthLoginRequested(),
-                                          );
+                                        AuthLoginRequested(),
+                                      );
                                     },
                                     style: ElevatedButton.styleFrom(
                                       minimumSize: const Size.fromHeight(50),
@@ -115,8 +205,8 @@ class _AuthPageState extends State<AuthPage> {
                                     onPressed: () {
                                       setState(() => _isRegistering = true);
                                       context.read<AuthBloc>().add(
-                                            AuthRegisterRequested(),
-                                          );
+                                        AuthRegisterRequested(),
+                                      );
                                     },
                                     style: OutlinedButton.styleFrom(
                                       minimumSize: const Size.fromHeight(50),
